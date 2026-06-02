@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -18,6 +19,9 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close mobile menu when route changes
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <nav
@@ -61,19 +65,98 @@ export default function Navbar() {
             </NavLink>
           </div>
         </div>
-        <div className="flex items-center gap-stack-md">
+
+        {/* Desktop Auth Buttons */}
+        <div className="hidden md:flex items-center gap-stack-md">
           {!user ? (
             <>
-              <Link to="/login" className="hidden md:block font-label-md text-label-md text-secondary hover:text-primary transition-colors">
+              <Link to="/login" className="font-label-md text-label-md text-secondary hover:text-primary transition-colors">
                 Sign In
               </Link>
-              <Link to="/register" className="hidden md:block font-label-md text-label-md text-secondary hover:text-primary transition-colors">
+              <Link to="/register" className="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
                 Daftar
               </Link>
             </>
           ) : (
             <Link to="/user/dashboard" className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 inline-block text-center">
               Profile
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile Hamburger Button */}
+        <button
+          className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-lg hover:bg-surface-container transition-colors"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+          id="mobileMenuToggle"
+        >
+          <span className={`block w-5 h-0.5 bg-on-surface transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+          <span className={`block w-5 h-0.5 bg-on-surface mt-1 transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
+          <span className={`block w-5 h-0.5 bg-on-surface mt-1 transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          mobileMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-margin-mobile pb-4 pt-2 flex flex-col gap-3 bg-surface/95 dark:bg-surface-container/95 backdrop-blur-md border-t border-outline-variant/20">
+          <NavLink
+            to="/"
+            onClick={closeMobileMenu}
+            className={({ isActive }) =>
+              `font-label-md text-label-md py-2 px-3 rounded-lg transition-all duration-200 ${
+                isActive
+                  ? 'text-primary dark:text-primary-fixed-dim bg-primary/10'
+                  : 'text-secondary dark:text-secondary-fixed-dim hover:text-primary hover:bg-surface-container'
+              }`
+            }
+          >
+            🏠 Home
+          </NavLink>
+          <NavLink
+            to="/search"
+            onClick={closeMobileMenu}
+            className={({ isActive }) =>
+              `font-label-md text-label-md py-2 px-3 rounded-lg transition-all duration-200 ${
+                isActive
+                  ? 'text-primary dark:text-primary-fixed-dim bg-primary/10'
+                  : 'text-secondary dark:text-secondary-fixed-dim hover:text-primary hover:bg-surface-container'
+              }`
+            }
+          >
+            🔍 Cari Kamar
+          </NavLink>
+          
+          <div className="h-px bg-outline-variant/30 my-1"></div>
+          
+          {!user ? (
+            <>
+              <Link
+                to="/login"
+                onClick={closeMobileMenu}
+                className="font-label-md text-label-md py-2 px-3 rounded-lg text-secondary hover:text-primary hover:bg-surface-container transition-all duration-200"
+              >
+                🔑 Sign In
+              </Link>
+              <Link
+                to="/register"
+                onClick={closeMobileMenu}
+                className="bg-primary text-on-primary py-3 px-4 rounded-lg font-label-md text-label-md text-center hover:opacity-90 transition-all duration-200 shadow-sm"
+              >
+                ✨ Daftar Sekarang
+              </Link>
+            </>
+          ) : (
+            <Link
+              to="/user/dashboard"
+              onClick={closeMobileMenu}
+              className="bg-primary-container text-on-primary-container py-3 px-4 rounded-lg font-label-md text-label-md text-center hover:bg-primary hover:text-on-primary transition-all duration-200 shadow-sm"
+            >
+              👤 Profile
             </Link>
           )}
         </div>
