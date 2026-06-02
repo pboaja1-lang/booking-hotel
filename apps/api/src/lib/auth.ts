@@ -3,6 +3,8 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db.js";
 import * as schema from "../db/schema.js";
 
+const FRONTEND_URL_AUTH = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -30,5 +32,11 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // Update session every 24 hours
   },
-  trustedOrigins: [process.env.FRONTEND_URL || "http://localhost:5173", "http://localhost:5174"],
+  trustedOrigins: [
+    FRONTEND_URL_AUTH,
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://*.vercel.app",
+  ],
 });
+

@@ -12,16 +12,30 @@ import dashboardRoutes from "./routes/dashboard.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+// Strip trailing slash to prevent mismatch issues
+const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
 
 // Middleware
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || origin.startsWith('http://localhost:') || origin === FRONTEND_URL) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) {
+      return callback(null, true);
     }
+    // Allow localhost for development
+    if (origin.startsWith('http://localhost:')) {
+      return callback(null, true);
+    }
+    // Allow the configured frontend URL
+    if (origin === FRONTEND_URL) {
+      return callback(null, true);
+    }
+    // Allow any *.vercel.app subdomain for Vercel deployments
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    // Reject other origins without crashing the server
+    callback(null, false);
   },
   credentials: true
 }));
