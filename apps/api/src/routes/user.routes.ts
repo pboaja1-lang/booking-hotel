@@ -8,7 +8,7 @@ const router = Router();
 // User routes
 router.get("/me", requireAuth, async (req, res) => {
   try {
-    const user = await getUserById(req.user.id);
+    const user = await getUserById(req.user!.id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -21,7 +21,7 @@ router.get("/me", requireAuth, async (req, res) => {
 router.put("/me", requireAuth, async (req, res) => {
   try {
     const { name, phone, image } = req.body;
-    const user = await updateUserProfile(req.user.id, { name, phone, image });
+    const user = await updateUserProfile(req.user!.id, { name, phone, image });
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });

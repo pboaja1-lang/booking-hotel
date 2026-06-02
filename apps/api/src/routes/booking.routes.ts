@@ -16,7 +16,7 @@ const router = Router();
 // User Routes
 router.post("/", requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const body = req.body;
 
     const bookingData = {
@@ -51,7 +51,7 @@ router.post("/", requireAuth, async (req, res) => {
 
 router.get("/me", requireAuth, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user!.id;
     const { status } = req.query;
     const bookings = await getBookingsByUserId(userId, status as string);
     res.json(bookings);
@@ -63,12 +63,12 @@ router.get("/me", requireAuth, async (req, res) => {
 
 router.get("/:id", requireAuth, async (req, res) => {
   try {
-    const booking = await getBookingById(req.params.id);
+    const booking = await getBookingById(req.params.id as string);
     if (!booking) {
       return res.status(404).json({ error: "Booking not found" });
     }
     
-    if (booking.userId !== req.user.id && req.user.role !== "admin") {
+    if (booking.userId !== req.user!.id && req.user!.role !== "admin") {
       return res.status(403).json({ error: "Forbidden" });
     }
     
@@ -107,7 +107,7 @@ router.patch("/:id/status", requireAuth, requireAdmin, async (req, res) => {
     if (!status) {
       return res.status(400).json({ error: "Status is required" });
     }
-    const booking = await updateBookingStatus(req.params.id, status);
+    const booking = await updateBookingStatus(req.params.id as string, status);
     res.json(booking);
   } catch (error: any) {
     console.error("Error updating booking status:", error);
@@ -117,7 +117,7 @@ router.patch("/:id/status", requireAuth, requireAdmin, async (req, res) => {
 
 router.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
   try {
-    await deleteBooking(req.params.id);
+    await deleteBooking(req.params.id as string);
     res.json({ success: true });
   } catch (error: any) {
     console.error("Error deleting booking:", error);

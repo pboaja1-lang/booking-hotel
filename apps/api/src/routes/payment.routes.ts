@@ -15,7 +15,7 @@ router.post("/", requireAuth, async (req, res) => {
 
 router.get("/booking/:bookingId", requireAuth, async (req, res) => {
   try {
-    const payment = await getPaymentByBookingId(req.params.bookingId);
+    const payment = await getPaymentByBookingId(req.params.bookingId as string);
     if (!payment) {
       return res.status(404).json({ error: "Payment not found" });
     }
@@ -27,7 +27,7 @@ router.get("/booking/:bookingId", requireAuth, async (req, res) => {
 
 router.post("/:id/confirm", requireAuth, async (req, res) => {
   try {
-    const payment = await confirmPayment(req.params.id);
+    const payment = await confirmPayment(req.params.id as string);
     res.json(payment);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });

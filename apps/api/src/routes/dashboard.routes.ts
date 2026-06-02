@@ -28,7 +28,7 @@ router.get("/admin/recent-bookings", requireAuth, requireAdmin, async (req, res)
 // User Routes
 router.get("/me/stats", requireAuth, async (req, res) => {
   try {
-    const stats = await getUserDashboardStats(req.user.id);
+    const stats = await getUserDashboardStats(req.user!.id);
     res.json(stats);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
@@ -37,7 +37,7 @@ router.get("/me/stats", requireAuth, async (req, res) => {
 
 router.get("/me/upcoming", requireAuth, async (req, res) => {
   try {
-    const booking = await getUpcomingBooking(req.user.id);
+    const booking = await getUpcomingBooking(req.user!.id);
     res.json(booking || null);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
