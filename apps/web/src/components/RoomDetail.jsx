@@ -94,6 +94,10 @@ export default function RoomDetail() {
               </div>
             </div>
             <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background mb-stack-sm">{room.title}</h1>
+            <div className="flex items-center gap-1 text-secondary mb-4">
+              <span className="material-symbols-outlined text-sm">location_on</span>
+              <span className="font-body-md text-body-md">{room.location || 'Jakarta Pusat'}</span>
+            </div>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-3xl leading-relaxed">
               {room.description}
             </p>

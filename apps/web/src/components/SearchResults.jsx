@@ -23,7 +23,7 @@ export default function SearchResults() {
                 originalPrice: null,
                 rating: r.rating ? r.rating.toString() : '4.5',
                 image: r.mainImage || '',
-                location: r.floorInfo || '',
+                location: r.location || r.floorInfo || 'Jakarta Pusat',
                 type: r.type,
                 amenities: ['WiFi Gratis', 'AC'],
                 badge: r.badge || null,
@@ -74,6 +74,14 @@ export default function SearchResults() {
     // Derived Data
     const filteredRooms = useMemo(() => {
         return allRooms.filter(room => {
+            if (searchLocation && searchLocation.toLowerCase() !== "semua lokasi") {
+                const searchLower = searchLocation.toLowerCase();
+                const roomLocationLower = room.location.toLowerCase();
+                const roomTitleLower = room.title.toLowerCase();
+                if (!roomLocationLower.includes(searchLower) && !roomTitleLower.includes(searchLower)) {
+                    return false;
+                }
+            }
             if (selectedTypes.length > 0 && !selectedTypes.includes(room.type)) return false;
             if (room.priceNumeric > maxPrice) return false;
             if (selectedAmenities.length > 0) {
@@ -82,7 +90,7 @@ export default function SearchResults() {
             }
             return true;
         });
-    }, [allRooms, selectedTypes, maxPrice, selectedAmenities]);
+    }, [allRooms, selectedTypes, maxPrice, selectedAmenities, searchLocation]);
 
     const sortedRooms = useMemo(() => {
         let sorted = [...filteredRooms];

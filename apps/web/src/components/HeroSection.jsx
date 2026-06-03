@@ -40,36 +40,12 @@ export default function HeroSection() {
               <span className="material-symbols-outlined mb-1">domain</span>
               <span className="font-label-sm font-bold">Hotel</span>
             </button>
-            <button className="flex flex-col items-center justify-center text-white hover:bg-white/20 rounded-xl px-4 py-2 transition-colors">
-              <span className="material-symbols-outlined mb-1 text-white/90">flight</span>
-              <span className="font-label-sm">Tiket Pesawat</span>
-            </button>
-            <button className="flex flex-col items-center justify-center text-white hover:bg-white/20 rounded-xl px-4 py-2 transition-colors">
-              <span className="material-symbols-outlined mb-1 text-white/90">train</span>
-              <span className="font-label-sm">Tiket Kereta Api</span>
-            </button>
-            <button className="flex flex-col items-center justify-center text-white hover:bg-white/20 rounded-xl px-4 py-2 transition-colors hidden sm:flex">
-              <span className="material-symbols-outlined mb-1 text-white/90">directions_bus</span>
-              <span className="font-label-sm">Tiket Bus & Travel</span>
-            </button>
-            <button className="flex flex-col items-center justify-center text-white hover:bg-white/20 rounded-xl px-4 py-2 transition-colors hidden md:flex">
-              <span className="material-symbols-outlined mb-1 text-white/90">car_rental</span>
-              <span className="font-label-sm">Rental Mobil</span>
-            </button>
           </div>
 
-          {/* Sub-menu (Semua, Hotel, Vila, Apartemen) */}
-          <div className="flex items-center gap-4 mb-4 ml-2">
-            <span className="text-white font-label-md cursor-pointer hover:opacity-80">Semua</span>
-            <span className="text-white font-label-md cursor-pointer flex items-center gap-1 opacity-80 hover:opacity-100"><span className="material-symbols-outlined text-sm">domain</span> Hotel</span>
-            <span className="bg-primary/20 text-white font-label-md px-3 py-1 rounded-full cursor-pointer flex items-center gap-1 border border-white/30"><span className="material-symbols-outlined text-sm">home_work</span> Vila</span>
-            <span className="text-white font-label-md cursor-pointer flex items-center gap-1 opacity-80 hover:opacity-100"><span className="material-symbols-outlined text-sm">apartment</span> Apartemen</span>
-          </div>
-
-          <div className="flex items-center gap-8 mb-2 ml-2">
+          <div className="hidden md:flex items-center gap-8 mb-2 ml-2">
             <div className="text-white font-label-sm flex-[1.5]">Kota, tujuan, atau nama akomodasi</div>
-            <div className="text-white font-label-sm flex-1 hidden md:block">Tanggal Check-in & Check-out</div>
-            <div className="text-white font-label-sm flex-1 hidden md:block">Tamu dan Kamar</div>
+            <div className="text-white font-label-sm flex-1">Tanggal Check-in & Check-out</div>
+            <div className="text-white font-label-sm flex-1">Tamu dan Kamar</div>
           </div>
 
           {/* Search Bar - Single Pill Design */}
