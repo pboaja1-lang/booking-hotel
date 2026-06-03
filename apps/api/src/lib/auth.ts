@@ -6,6 +6,7 @@ import * as schema from "../db/schema.js";
 const FRONTEND_URL_AUTH = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/+$/, "");
 
 export const auth = betterAuth({
+  baseURL: FRONTEND_URL_AUTH,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
