@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authClient } from '../lib/auth-client';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -29,12 +30,26 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    alert('Fitur login Google belum tersedia di versi ini. Silakan mendaftar menggunakan email.');
+  const handleGoogleLogin = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: '/user/dashboard',
+      });
+    } catch (error) {
+      alert('Gagal login dengan Google: ' + (error.message || 'Terjadi kesalahan'));
+    }
   };
 
-  const handleFacebookLogin = () => {
-    alert('Fitur login Facebook belum tersedia di versi ini. Silakan mendaftar menggunakan email.');
+  const handleFacebookLogin = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: 'facebook',
+        callbackURL: '/user/dashboard',
+      });
+    } catch (error) {
+      alert('Gagal login dengan Facebook: ' + (error.message || 'Terjadi kesalahan'));
+    }
   };
 
   return (

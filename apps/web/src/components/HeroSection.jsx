@@ -57,7 +57,8 @@ export default function HeroSection() {
                 type="button" 
                 onClick={(e) => {
                   e.preventDefault();
-                  alert("Membuka Google Maps...");
+                  const query = location ? encodeURIComponent(location) : '';
+                  window.open(`https://www.google.com/maps/search/${query}`, '_blank', 'noopener,noreferrer');
                 }}
                 className="flex items-center justify-center text-primary hover:text-primary-container transition-colors"
                 title="Buka Peta"

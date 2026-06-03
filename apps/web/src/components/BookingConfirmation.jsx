@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 export default function BookingConfirmation() {
   const location = useLocation();
+  const ticketRef = useRef(null);
+  const [shareStatus, setShareStatus] = useState('');
 
   const { room, bookingDetails } = location.state || {
     room: {
@@ -43,7 +45,138 @@ export default function BookingConfirmation() {
   };
 
   // Generate a random booking code
-  const bookingCode = `#BK-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`;
+  const [bookingCode] = useState(() => 
+    `#BK-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}${String(Math.floor(Math.random() * 100)).padStart(2, '0')}`
+  );
+
+  // Download booking as printable HTML receipt
+  const handleDownload = () => {
+    const receiptHTML = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking Receipt - ${bookingCode}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; }
+    .receipt { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 20px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #8B4513, #D2691E); color: white; padding: 24px; text-align: center; }
+    .header h1 { font-size: 24px; margin-bottom: 4px; }
+    .header p { opacity: 0.9; font-size: 14px; }
+    .booking-code { background: rgba(255,255,255,0.15); display: inline-block; padding: 8px 20px; border-radius: 8px; margin-top: 12px; font-size: 20px; font-weight: bold; letter-spacing: 1px; }
+    .body { padding: 24px; }
+    .hotel-name { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .room-type { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .details { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .detail-item label { display: block; font-size: 11px; text-transform: uppercase; color: #999; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .detail-item p { font-size: 15px; color: #333; font-weight: 500; }
+    .detail-item .sub { font-size: 12px; color: #888; }
+    .divider { border: none; border-top: 2px dashed #e0e0e0; margin: 20px 0; }
+    .total-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
+    .total-label { font-size: 12px; color: #999; text-transform: uppercase; }
+    .total-amount { font-size: 22px; font-weight: 700; color: #333; }
+    .paid-badge { display: inline-flex; align-items: center; gap: 4px; color: #27ae60; font-size: 13px; font-weight: 500; margin-top: 4px; }
+    .footer { background: #fafafa; padding: 16px 24px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; }
+    @media print { body { padding: 0; background: white; } .receipt { box-shadow: none; } }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <h1>Venellopy.io</h1>
+      <p>Konfirmasi Booking</p>
+      <div class="booking-code">${bookingCode}</div>
+    </div>
+    <div class="body">
+      <p class="hotel-name">Venellopy.io ${room.location || ''}</p>
+      <p class="room-type">🛏️ ${room.title}</p>
+      <div class="details">
+        <div class="detail-item">
+          <label>Check-in</label>
+          <p>${formatDate(bookingDetails.checkIn)}</p>
+          <span class="sub">Mulai 14:00</span>
+        </div>
+        <div class="detail-item">
+          <label>Check-out</label>
+          <p>${formatDate(bookingDetails.checkOut)}</p>
+          <span class="sub">Sebelum 12:00</span>
+        </div>
+        <div class="detail-item">
+          <label>Tamu</label>
+          <p>${bookingDetails.adults} Dewasa, ${bookingDetails.children} Anak</p>
+        </div>
+        <div class="detail-item">
+          <label>Status</label>
+          <p class="paid-badge">✅ Sudah Dibayar</p>
+        </div>
+      </div>
+      <hr class="divider" />
+      <div class="total-row">
+        <div>
+          <p class="total-label">Total Harga</p>
+          <p class="total-amount">${formatIDR(bookingDetails.total)}</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <p>Terima kasih telah memesan dengan Venellopy.io</p>
+      <p>Harap simpan bukti booking ini untuk keperluan check-in.</p>
+    </div>
+  </div>
+  <script>window.onload = function() { window.print(); }</script>
+</body>
+</html>`;
+
+    const blob = new Blob([receiptHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
+    
+    // Clean up the URL after the window is loaded
+    if (printWindow) {
+      printWindow.onafterprint = () => URL.revokeObjectURL(url);
+    }
+  };
+
+  // Share booking details
+  const handleShare = async () => {
+    const shareData = {
+      title: `Booking Venellopy.io - ${bookingCode}`,
+      text: `🏨 Booking Berhasil!\n\nKode: ${bookingCode}\nHotel: Venellopy.io ${room.location || ''}\nKamar: ${room.title}\nCheck-in: ${formatDate(bookingDetails.checkIn)}\nCheck-out: ${formatDate(bookingDetails.checkOut)}\nTamu: ${bookingDetails.adults} Dewasa, ${bookingDetails.children} Anak\nTotal: ${formatIDR(bookingDetails.total)}\n\nStatus: ✅ Sudah Dibayar`,
+      url: window.location.href,
+    };
+
+    // Use Web Share API if available (mobile & modern browsers)
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // User cancelled sharing, that's OK
+        if (err.name !== 'AbortError') {
+          console.error('Error sharing:', err);
+        }
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareData.text);
+        setShareStatus('copied');
+        setTimeout(() => setShareStatus(''), 2500);
+      } catch (err) {
+        // Final fallback: select and copy via textarea
+        const textarea = document.createElement('textarea');
+        textarea.value = shareData.text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        setShareStatus('copied');
+        setTimeout(() => setShareStatus(''), 2500);
+      }
+    }
+  };
 
   return (
     <div className="bg-background min-h-screen flex flex-col font-body-md text-on-surface antialiased"
@@ -78,7 +211,7 @@ export default function BookingConfirmation() {
           </div>
 
           {/* E-Ticket Card */}
-          <div className="w-full bg-surface-container-lowest rounded-xl shadow-[0_2px_4px_rgba(26,26,46,0.02),0_12px_20px_rgba(26,26,46,0.06)] relative overflow-hidden transition-transform duration-300 hover:scale-[1.01] hover:shadow-[0_4px_8px_rgba(26,26,46,0.04),0_16px_24px_rgba(26,26,46,0.08)]">
+          <div ref={ticketRef} className="w-full bg-surface-container-lowest rounded-xl shadow-[0_2px_4px_rgba(26,26,46,0.02),0_12px_20px_rgba(26,26,46,0.06)] relative overflow-hidden transition-transform duration-300 hover:scale-[1.01] hover:shadow-[0_4px_8px_rgba(26,26,46,0.04),0_16px_24px_rgba(26,26,46,0.08)]">
             
             {/* Ticket Header */}
             <div className="p-stack-lg bg-surface-container-lowest border-b border-outline-variant/30 flex justify-between items-start">
@@ -148,14 +281,19 @@ export default function BookingConfirmation() {
             {/* Ticket Footer / Actions */}
             <div className="p-stack-md bg-surface-container-low border-t border-outline-variant/30 flex gap-stack-sm justify-end">
               <button 
-                onClick={() => alert('Fitur bagikan akan segera hadir!')}
-                className="px-6 py-2 rounded-lg border border-outline text-on-surface-variant font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center gap-2 group"
+                onClick={handleShare}
+                className="px-6 py-2 rounded-lg border border-outline text-on-surface-variant font-label-md text-label-md hover:bg-surface-variant transition-colors flex items-center gap-2 group relative"
               >
                 <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">share</span>
-                Bagikan
+                {shareStatus === 'copied' ? 'Tersalin!' : 'Bagikan'}
+                {shareStatus === 'copied' && (
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-xs px-2 py-1 rounded whitespace-nowrap">
+                    Teks booking disalin ke clipboard
+                  </span>
+                )}
               </button>
               <button 
-                onClick={() => alert('Fitur unduh akan segera hadir!')}
+                onClick={handleDownload}
                 className="px-6 py-2 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:bg-on-secondary-fixed-variant transition-colors shadow-sm flex items-center gap-2 group"
               >
                 <span className="material-symbols-outlined text-[18px] group-hover:-translate-y-1 transition-transform">download</span>
@@ -197,3 +335,4 @@ export default function BookingConfirmation() {
     </div>
   );
 }
+

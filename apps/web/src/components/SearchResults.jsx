@@ -48,7 +48,7 @@ export default function SearchResults() {
     
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 2;
+    const itemsPerPage = 6;
 
     const handleTypeChange = (type) => {
         setSelectedTypes(prev => 
@@ -163,7 +163,7 @@ export default function SearchResults() {
                                 />
                                 <button 
                                     type="button" 
-                                    onClick={(e) => { e.preventDefault(); alert("Membuka Google Maps..."); }}
+                                    onClick={(e) => { e.preventDefault(); const query = searchLocation ? encodeURIComponent(searchLocation) : ''; window.open(`https://www.google.com/maps/search/${query}`, '_blank', 'noopener,noreferrer'); }}
                                     className="flex items-center justify-center text-primary hover:text-primary-container transition-colors"
                                     title="Buka Peta"
                                 >
@@ -286,66 +286,87 @@ export default function SearchResults() {
                         </div>
                     </div>
 
-                    {/* Results List */}
-                    <div className="space-y-stack-lg">
+                    {/* Results Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter">
                         {paginatedRooms.length > 0 ? paginatedRooms.map((room) => (
-                            <div key={room.id} className="glass-card rounded-xl border border-surface-variant overflow-hidden hover:scale-[1.02] transition-all duration-200 shadow-[0_2px_4px_rgba(26,26,46,0.05),0_12px_20px_rgba(26,26,46,0.05)] hover:shadow-[0_4px_8px_rgba(26,26,46,0.1),0_16px_24px_rgba(26,26,46,0.1)] group flex flex-col md:flex-row">
-                                <div className="md:w-1/3 relative h-48 md:h-auto bg-surface-container">
-                                    <img src={room.image} alt={room.title} className="w-full h-full object-cover border-r border-outline-variant/20" />
+                            <div 
+                                key={room.id} 
+                                className="bg-surface-container-lowest rounded-xl overflow-hidden card-shadow hover:card-hover-shadow transform hover:scale-[1.02] transition-all duration-300 flex flex-col group border border-outline-variant/20"
+                            >
+                                <div className="relative h-64 overflow-hidden">
+                                    <img 
+                                        src={room.image} 
+                                        alt={room.title} 
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                    />
                                     {room.badge && (
-                                        <div className="absolute top-2 left-2 bg-secondary-container/90 text-on-secondary-fixed-variant px-2 py-1 rounded font-label-sm text-label-sm backdrop-blur-sm">
-                                            {room.badge}
+                                        <div className="absolute top-4 left-4 bg-tertiary-container/20 text-on-tertiary-container border border-tertiary-container/30 px-3 py-1 rounded-full shadow-sm backdrop-blur-sm">
+                                            <span className="font-label-sm text-label-sm">
+                                                {room.badge}
+                                            </span>
                                         </div>
                                     )}
-                                </div>
-                                <div className="p-stack-lg flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h3 className="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">{room.title}</h3>
-                                            <div className="flex items-center bg-surface-container-low px-2 py-1 rounded-lg">
-                                                <span className="material-symbols-outlined text-primary-container text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                                <span className="font-label-sm text-label-sm ml-1">{room.rating}</span>
-                                            </div>
-                                        </div>
-                                        <p className="font-body-sm text-body-sm text-secondary mb-stack-md flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-sm">location_on</span> {room.location}
-                                        </p>
-                                        <div className="flex flex-wrap gap-2 mb-stack-lg">
-                                            {room.amenities.map(amenity => {
-                                                // Quick map for material icons based on string
-                                                let icon = "check";
-                                                if(amenity.includes("WiFi")) icon = "wifi";
-                                                if(amenity.includes("AC")) icon = "ac_unit";
-                                                if(amenity.includes("TV")) icon = "tv";
-                                                if(amenity.includes("Kolam")) icon = "pool";
-                                                if(amenity.includes("Sarapan")) icon = "restaurant";
-                                                if(amenity.includes("Bathtub")) icon = "bathtub";
-
-                                                return (
-                                                    <span key={amenity} className="inline-flex items-center gap-1 bg-surface-container px-2 py-1 rounded-md font-body-sm text-body-sm text-secondary">
-                                                        <span className="material-symbols-outlined text-sm">{icon}</span> {amenity}
-                                                    </span>
-                                                )
-                                            })}
-                                        </div>
+                                    <div className="absolute top-4 right-4 bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                                        <span 
+                                            className="material-symbols-outlined text-primary-container text-[16px]" 
+                                            style={{ fontVariationSettings: "'FILL' 1" }}
+                                        >
+                                            star
+                                        </span>
+                                        <span className="font-label-sm text-label-sm text-on-surface">
+                                            {room.rating}
+                                        </span>
                                     </div>
-                                    <div className="flex justify-between items-end border-t border-outline-variant/30 pt-stack-md">
+                                </div>
+                                <div className="p-stack-md flex-1 flex flex-col">
+                                    <div className="flex justify-between items-start mb-stack-sm">
+                                        <h3 className="font-headline-sm text-headline-sm text-on-surface">
+                                            {room.title}
+                                        </h3>
+                                    </div>
+                                    <p className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mb-stack-xs">
+                                        <span className="material-symbols-outlined text-sm">location_on</span> {room.location}
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5 mb-stack-md">
+                                        {room.amenities.map(amenity => {
+                                            let icon = "check";
+                                            if(amenity.includes("WiFi")) icon = "wifi";
+                                            if(amenity.includes("AC")) icon = "ac_unit";
+                                            if(amenity.includes("TV")) icon = "tv";
+                                            if(amenity.includes("Kolam")) icon = "pool";
+                                            if(amenity.includes("Sarapan")) icon = "restaurant";
+                                            if(amenity.includes("Bathtub")) icon = "bathtub";
+                                            return (
+                                                <span key={amenity} className="inline-flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-md font-body-sm text-body-sm text-secondary text-xs">
+                                                    <span className="material-symbols-outlined text-sm">{icon}</span> {amenity}
+                                                </span>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="flex justify-between items-end border-t border-outline-variant/30 pt-stack-sm mt-auto">
                                         <div>
-                                            {room.originalPrice && <p className="font-body-sm text-body-sm text-secondary line-through">{room.originalPrice}</p>}
-                                            <p className="font-headline-sm text-headline-sm text-primary">{room.price}<span className="font-body-sm text-body-sm text-secondary font-normal">/malam</span></p>
+                                            <span className="block font-label-sm text-label-sm text-secondary">
+                                                Mulai dari
+                                            </span>
+                                            <span className="font-headline-sm text-headline-sm text-primary">
+                                                {room.price}
+                                                <span className="font-body-sm text-body-sm text-secondary font-normal">
+                                                    /malam
+                                                </span>
+                                            </span>
                                         </div>
                                         <Link 
                                             to="/room" 
                                             state={{ room }}
-                                            className="bg-primary text-on-primary font-label-md text-label-md px-6 py-2 rounded-lg hover:bg-surface-tint transition-colors shadow-[0_2px_4px_rgba(26,26,46,0.05),0_12px_20px_rgba(26,26,46,0.05)] active:scale-95 text-center"
+                                            className="bg-surface-container text-primary font-label-md text-label-md px-4 py-2 rounded-lg hover:bg-primary hover:text-on-primary transition-colors duration-200"
                                         >
-                                            Lihat Detail
+                                            Detail
                                         </Link>
                                     </div>
                                 </div>
                             </div>
                         )) : (
-                            <div className="text-center py-stack-xl">
+                            <div className="col-span-full text-center py-stack-xl">
                                 <p className="font-body-lg text-body-lg text-secondary">Tidak ada kamar yang sesuai dengan kriteria filter.</p>
                             </div>
                         )}
