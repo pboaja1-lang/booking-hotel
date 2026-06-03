@@ -28,109 +28,117 @@ export default function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop flex flex-col items-center mt-10">
-        <h1 className="font-headline-xl text-headline-xl text-white mb-stack-sm text-center drop-shadow-md">
-          Temukan Hotel Impian Anda
+      <div className="relative z-10 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop flex flex-col items-center mt-16 md:mt-24">
+        <h1 className="font-headline-xl text-headline-xl text-white mb-stack-xl text-center drop-shadow-md tracking-tight">
+          Pilihan utama untuk jelajahi dunia
         </h1>
-        <p className="font-body-lg text-body-lg text-white mb-stack-xl text-center max-w-2xl drop-shadow-sm opacity-90">
-          Pengalaman menginap mewah dengan layanan yang dirancang khusus untuk kenyamanan Anda. Pesan sekarang dan nikmati penawaran eksklusif.
-        </p>
 
-        {/* Search Bar */}
-        <form 
-          onSubmit={handleSearch}
-          className="bg-surface-container-lowest p-2 md:p-3 rounded-2xl w-full max-w-5xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] flex flex-col md:flex-row gap-2"
-        >
-          {/* Lokasi */}
-          <div className="flex-[1.2] px-4 py-2 hover:bg-surface-container-low transition-colors rounded-xl cursor-pointer">
-            <label className="block font-label-sm text-label-sm text-secondary mb-1">Lokasi</label>
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">location_on</span>
+        <div className="w-full max-w-5xl">
+          {/* Menu Options (Traveloka Style) */}
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-6">
+            <button className="flex flex-col items-center justify-center bg-white text-primary rounded-full px-6 py-2 shadow-lg min-w-[100px]">
+              <span className="material-symbols-outlined mb-1">domain</span>
+              <span className="font-label-sm font-bold">Hotel</span>
+            </button>
+            <button className="flex flex-col items-center justify-center text-white hover:bg-white/20 rounded-xl px-4 py-2 transition-colors">
+              <span className="material-symbols-outlined mb-1 text-white/90">flight</span>
+              <span className="font-label-sm">Tiket Pesawat</span>
+            </button>
+            <button className="flex flex-col items-center justify-center text-white hover:bg-white/20 rounded-xl px-4 py-2 transition-colors">
+              <span className="material-symbols-outlined mb-1 text-white/90">train</span>
+              <span className="font-label-sm">Tiket Kereta Api</span>
+            </button>
+            <button className="flex flex-col items-center justify-center text-white hover:bg-white/20 rounded-xl px-4 py-2 transition-colors hidden sm:flex">
+              <span className="material-symbols-outlined mb-1 text-white/90">directions_bus</span>
+              <span className="font-label-sm">Tiket Bus & Travel</span>
+            </button>
+            <button className="flex flex-col items-center justify-center text-white hover:bg-white/20 rounded-xl px-4 py-2 transition-colors hidden md:flex">
+              <span className="material-symbols-outlined mb-1 text-white/90">car_rental</span>
+              <span className="font-label-sm">Rental Mobil</span>
+            </button>
+          </div>
+
+          {/* Sub-menu (Semua, Hotel, Vila, Apartemen) */}
+          <div className="flex items-center gap-4 mb-4 ml-2">
+            <span className="text-white font-label-md cursor-pointer hover:opacity-80">Semua</span>
+            <span className="text-white font-label-md cursor-pointer flex items-center gap-1 opacity-80 hover:opacity-100"><span className="material-symbols-outlined text-sm">domain</span> Hotel</span>
+            <span className="bg-primary/20 text-white font-label-md px-3 py-1 rounded-full cursor-pointer flex items-center gap-1 border border-white/30"><span className="material-symbols-outlined text-sm">home_work</span> Vila</span>
+            <span className="text-white font-label-md cursor-pointer flex items-center gap-1 opacity-80 hover:opacity-100"><span className="material-symbols-outlined text-sm">apartment</span> Apartemen</span>
+          </div>
+
+          <div className="flex items-center gap-8 mb-2 ml-2">
+            <div className="text-white font-label-sm flex-[1.5]">Kota, tujuan, atau nama akomodasi</div>
+            <div className="text-white font-label-sm flex-1 hidden md:block">Tanggal Check-in & Check-out</div>
+            <div className="text-white font-label-sm flex-1 hidden md:block">Tamu dan Kamar</div>
+          </div>
+
+          {/* Search Bar - Single Pill Design */}
+          <form 
+            onSubmit={handleSearch}
+            className="bg-white p-1 md:p-1.5 rounded-[32px] w-full shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex flex-col md:flex-row items-center border border-gray-200"
+          >
+            {/* Lokasi */}
+            <div className="flex-[1.5] w-full px-4 py-3 hover:bg-surface-container-low transition-colors rounded-full cursor-pointer group flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary text-[24px]">location_on</span>
               <input 
                 type="text" 
-                placeholder="Mau ke mana?" 
+                placeholder="Kota, vila, atau destinasi" 
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full min-w-0 bg-transparent border-0 p-0 font-body-md text-body-md focus:ring-0 text-on-surface"
-              />
-              <button 
-                type="button" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  const query = location ? encodeURIComponent(location) : '';
-                  window.open(`https://www.google.com/maps/search/${query}`, '_blank', 'noopener,noreferrer');
-                }}
-                className="flex items-center justify-center text-primary hover:text-primary-container transition-colors"
-                title="Buka Peta"
-              >
-                <span className="material-symbols-outlined text-[20px]">map</span>
-              </button>
-            </div>
-          </div>
-          
-          <div className="hidden md:block w-px bg-outline-variant/30 my-2"></div>
-
-          {/* Check-in */}
-          <div className="flex-1 px-4 py-2 hover:bg-surface-container-low transition-colors rounded-xl cursor-pointer">
-            <label className="block font-label-sm text-label-sm text-secondary mb-1">Check-in</label>
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
-              <input 
-                type="date" 
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
-                className="w-full min-w-0 bg-transparent border-0 p-0 font-body-md text-body-md focus:ring-0 text-on-surface cursor-pointer"
+                className="w-full min-w-0 bg-transparent border-0 p-0 font-body-lg text-body-lg focus:ring-0 text-on-surface placeholder:text-gray-400"
               />
             </div>
-          </div>
-          
-          <div className="hidden md:block w-px bg-outline-variant/30 my-2"></div>
+            
+            <div className="hidden md:block w-px h-10 bg-gray-300"></div>
 
-          {/* Check-out */}
-          <div className="flex-1 px-4 py-2 hover:bg-surface-container-low transition-colors rounded-xl cursor-pointer">
-            <label className="block font-label-sm text-label-sm text-secondary mb-1">Check-out</label>
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">calendar_today</span>
-              <input 
-                type="date" 
-                value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
-                className="w-full min-w-0 bg-transparent border-0 p-0 font-body-md text-body-md focus:ring-0 text-on-surface cursor-pointer"
-              />
+            {/* Check-in & Check-out Combined */}
+            <div className="flex-1 w-full px-4 py-3 hover:bg-surface-container-low transition-colors rounded-full cursor-pointer group flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary text-[24px]">calendar_month</span>
+              <div className="flex items-center w-full">
+                <input 
+                  type="date" 
+                  value={checkIn}
+                  onChange={(e) => setCheckIn(e.target.value)}
+                  className="w-1/2 min-w-0 bg-transparent border-0 p-0 font-body-md text-body-md focus:ring-0 text-on-surface cursor-pointer"
+                />
+                <span className="text-gray-400 mx-1">-</span>
+                <input 
+                  type="date" 
+                  value={checkOut}
+                  onChange={(e) => setCheckOut(e.target.value)}
+                  className="w-1/2 min-w-0 bg-transparent border-0 p-0 font-body-md text-body-md focus:ring-0 text-on-surface cursor-pointer"
+                />
+              </div>
             </div>
-          </div>
-          
-          <div className="hidden md:block w-px bg-outline-variant/30 my-2"></div>
+            
+            <div className="hidden md:block w-px h-10 bg-gray-300"></div>
 
-          {/* Tamu & Kamar */}
-          <div className="flex-1 px-4 py-2 hover:bg-surface-container-low transition-colors rounded-xl cursor-pointer">
-            <label className="block font-label-sm text-label-sm text-secondary mb-1">Tamu & Kamar</label>
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-secondary text-[20px]">person</span>
-                <select 
+            {/* Tamu & Kamar */}
+            <div className="flex-1 w-full px-4 py-3 hover:bg-surface-container-low transition-colors rounded-full cursor-pointer group flex items-center gap-3">
+              <span className="material-symbols-outlined text-primary text-[24px]">person</span>
+              <select 
                 value={guests}
                 onChange={(e) => setGuests(e.target.value)}
                 className="w-full min-w-0 bg-transparent border-0 pl-0 pr-8 py-0 text-ellipsis overflow-hidden whitespace-nowrap font-body-md text-body-md focus:ring-0 text-on-surface cursor-pointer"
               >
-                <option value="1 Tamu, 1 Kamar">1 Tamu, 1 Kamar</option>
-                <option value="2 Tamu, 1 Kamar">2 Tamu, 1 Kamar</option>
-                <option value="3 Tamu, 1 Kamar">3 Tamu, 1 Kamar</option>
-                <option value="4 Tamu, 2 Kamar">4 Tamu, 2 Kamar</option>
+                <option value="1 Dewasa, 0 Anak, 1 Kamar">1 Dewasa, 0 Anak, 1 Kamar</option>
+                <option value="2 Dewasa, 0 Anak, 1 Kamar">2 Dewasa, 0 Anak, 1 Kamar</option>
+                <option value="3 Dewasa, 0 Anak, 1 Kamar">3 Dewasa, 0 Anak, 1 Kamar</option>
+                <option value="4 Dewasa, 0 Anak, 2 Kamar">4 Dewasa, 0 Anak, 2 Kamar</option>
               </select>
             </div>
-          </div>
 
-          {/* Search Button */}
-          <div className="flex items-center justify-center p-2">
-            <button 
-              type="submit"
-              className="w-full md:w-auto h-full bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary px-8 py-3 rounded-xl font-label-md text-label-md transition-all duration-200 hover:scale-[1.02] shadow-md flex items-center justify-center gap-2 active:scale-95"
-            >
-              <span className="material-symbols-outlined text-[20px]">search</span>
-              CARI HOTEL
-            </button>
-          </div>
-        </form>
+            {/* Search Button */}
+            <div className="p-1 w-full md:w-auto">
+              <button 
+                type="submit"
+                className="w-full md:w-[60px] h-[50px] bg-[#FF5E1F] text-white hover:bg-[#E05018] rounded-[28px] font-label-md text-label-md transition-all duration-200 shadow-md flex items-center justify-center active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[24px]">search</span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </section>
   );

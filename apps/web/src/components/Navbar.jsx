@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,17 +25,21 @@ export default function Navbar() {
   // Close mobile menu when route changes
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
+  const isTransparent = isHome && !scrolled;
+
   return (
     <nav
-      className={`bg-surface/80 dark:bg-surface-container/80 backdrop-blur-md fixed top-0 w-full border-b border-outline-variant/30 z-50 transition-all duration-300 ${
-        scrolled ? 'shadow-md' : 'shadow-sm'
+      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        isTransparent
+          ? 'bg-transparent text-white py-2'
+          : 'bg-surface/90 dark:bg-surface-container/90 backdrop-blur-md border-b border-outline-variant/30 shadow-sm py-0 text-on-surface'
       }`}
       id="mainNav"
     >
       <div className="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
         <div className="flex items-center gap-stack-lg">
           <Link
-            className="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim tracking-tight"
+            className={`font-headline-md text-headline-md tracking-tight ${isTransparent ? 'text-white' : 'text-primary dark:text-primary-fixed-dim'}`}
             to="/"
           >
             Venellopy.io
@@ -43,9 +49,11 @@ export default function Navbar() {
               to="/"
               className={({ isActive }) =>
                 `font-label-md text-label-md pb-1 transition-all duration-200 hover:scale-105 active:scale-95 border-b-2 ${
-                  isActive
-                    ? 'text-primary dark:text-primary-fixed-dim border-primary dark:border-primary-fixed-dim'
-                    : 'text-secondary dark:text-secondary-fixed-dim border-transparent hover:text-primary dark:hover:text-primary-fixed-dim'
+                  isTransparent
+                    ? isActive ? 'text-white border-white' : 'text-white/80 border-transparent hover:text-white'
+                    : isActive
+                      ? 'text-primary dark:text-primary-fixed-dim border-primary dark:border-primary-fixed-dim'
+                      : 'text-secondary dark:text-secondary-fixed-dim border-transparent hover:text-primary dark:hover:text-primary-fixed-dim'
                 }`
               }
             >
@@ -55,9 +63,11 @@ export default function Navbar() {
               to="/search"
               className={({ isActive }) =>
                 `font-label-md text-label-md pb-1 transition-all duration-200 hover:scale-105 active:scale-95 border-b-2 ${
-                  isActive
-                    ? 'text-primary dark:text-primary-fixed-dim border-primary dark:border-primary-fixed-dim'
-                    : 'text-secondary dark:text-secondary-fixed-dim border-transparent hover:text-primary dark:hover:text-primary-fixed-dim'
+                  isTransparent
+                    ? isActive ? 'text-white border-white' : 'text-white/80 border-transparent hover:text-white'
+                    : isActive
+                      ? 'text-primary dark:text-primary-fixed-dim border-primary dark:border-primary-fixed-dim'
+                      : 'text-secondary dark:text-secondary-fixed-dim border-transparent hover:text-primary dark:hover:text-primary-fixed-dim'
                 }`
               }
             >
@@ -70,15 +80,15 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-stack-md">
           {!user ? (
             <>
-              <Link to="/login" className="font-label-md text-label-md text-secondary hover:text-primary transition-colors">
+              <Link to="/login" className={`font-label-md text-label-md transition-colors ${isTransparent ? 'text-white hover:text-white/80' : 'text-secondary hover:text-primary'}`}>
                 Sign In
               </Link>
-              <Link to="/register" className="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all duration-200 shadow-sm hover:shadow-md active:scale-95">
+              <Link to="/register" className={`px-4 py-2 rounded-full font-label-md text-label-md transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 ${isTransparent ? 'bg-white text-primary hover:bg-white/90' : 'bg-primary text-on-primary hover:opacity-90'}`}>
                 Daftar
               </Link>
             </>
           ) : (
-            <Link to="/user/dashboard" className="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 inline-block text-center">
+            <Link to="/user/dashboard" className={`px-4 py-2 rounded-full font-label-md text-label-md transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 inline-block text-center ${isTransparent ? 'bg-white text-primary hover:bg-white/90' : 'bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary'}`}>
               Profile
             </Link>
           )}
@@ -86,14 +96,14 @@ export default function Navbar() {
 
         {/* Mobile Hamburger Button */}
         <button
-          className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-lg hover:bg-surface-container transition-colors"
+          className={`md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-lg transition-colors ${isTransparent ? 'hover:bg-white/10' : 'hover:bg-surface-container'}`}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
           id="mobileMenuToggle"
         >
-          <span className={`block w-5 h-0.5 bg-on-surface transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-          <span className={`block w-5 h-0.5 bg-on-surface mt-1 transition-all duration-300 ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
-          <span className={`block w-5 h-0.5 bg-on-surface mt-1 transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+          <span className={`block w-5 h-0.5 transition-all duration-300 ${isTransparent ? 'bg-white' : 'bg-on-surface'} ${mobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+          <span className={`block w-5 h-0.5 mt-1 transition-all duration-300 ${isTransparent ? 'bg-white' : 'bg-on-surface'} ${mobileMenuOpen ? 'opacity-0' : ''}`}></span>
+          <span className={`block w-5 h-0.5 mt-1 transition-all duration-300 ${isTransparent ? 'bg-white' : 'bg-on-surface'} ${mobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
         </button>
       </div>
 
