@@ -166,6 +166,7 @@ async function seedRealHotels() {
           // Calculate price based on multiplier
           const roomPrice = Math.round(hotel.basePrice * typeMultipliers[typeName]);
           const fullName = `${hotel.hotelName} - ${typeName}`;
+          const imageNumber = totalInserted + 1;
           
           await db.insert(room).values({
               name: fullName,
@@ -176,7 +177,7 @@ async function seedRealHotels() {
               floorInfo: hotel.floorInfo,
               latitude: hotel.lat,
               longitude: hotel.lng,
-              mainImage: hotel.mainImage,
+              mainImage: `/hotels/rooms/room-${imageNumber}.jpg`,
               rating: hotel.rating,
               badge: hotel.badge,
               maxGuests: typeName.includes("Villa") || typeName.includes("Suite") ? 4 : 2
