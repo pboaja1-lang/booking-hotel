@@ -162,7 +162,7 @@ export default function RegisterPage() {
 
           {/* Submit Button */}
           <button
-            className="w-full mt-stack-sm bg-primary-container text-on-primary py-3 px-6 rounded-lg font-label-md text-label-md shadow-[0_4px_12px_rgba(230,126,34,0.25)] hover:scale-[1.02] hover:shadow-[0_6px_16px_rgba(230,126,34,0.35)] active:scale-[0.98] transition-all duration-200 flex justify-center items-center gap-2"
+            className="w-full mt-stack-sm bg-primary-container text-on-primary py-3 px-6 rounded-lg font-label-md text-label-md shadow-[0_4px_12px_rgba(0,113,194,0.25)] hover:scale-[1.02] hover:shadow-[0_6px_16px_rgba(0,113,194,0.35)] active:scale-[0.98] transition-all duration-200 flex justify-center items-center gap-2"
             type="submit"
           >
             DAFTAR

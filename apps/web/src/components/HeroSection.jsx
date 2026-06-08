@@ -36,7 +36,7 @@ export default function HeroSection() {
         <div className="w-full max-w-5xl">
           {/* Menu Options (Traveloka Style) */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 mb-6">
-            <button className="flex flex-col items-center justify-center bg-white text-primary rounded-full px-6 py-2 shadow-lg min-w-[100px]">
+            <button className="flex flex-col items-center justify-center bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-full px-6 py-2 shadow-lg min-w-[100px] hover:bg-white/30 transition-all duration-200">
               <span className="material-symbols-outlined mb-1">domain</span>
               <span className="font-label-sm font-bold">Hotel</span>
             </button>
@@ -108,7 +108,7 @@ export default function HeroSection() {
             <div className="p-1 w-full md:w-auto">
               <button 
                 type="submit"
-                className="w-full md:w-[60px] h-[50px] bg-[#FF5E1F] text-white hover:bg-[#E05018] rounded-[28px] font-label-md text-label-md transition-all duration-200 shadow-md flex items-center justify-center active:scale-95"
+                className="w-full md:w-[60px] h-[50px] bg-[#0071c2] text-white hover:bg-[#00487a] rounded-[28px] font-label-md text-label-md transition-all duration-200 shadow-md flex items-center justify-center active:scale-95"
               >
                 <span className="material-symbols-outlined text-[24px]">search</span>
               </button>

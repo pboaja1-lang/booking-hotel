@@ -57,7 +57,7 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop font-body-md text-on-surface"
       style={{
         backgroundColor: '#f8f9fc',
-        backgroundImage: 'radial-gradient(#dcc1b1 1px, transparent 1px)',
+        backgroundImage: 'radial-gradient(#c0cdd8 1px, transparent 1px)',
         backgroundSize: '20px 20px',
       }}
     >
