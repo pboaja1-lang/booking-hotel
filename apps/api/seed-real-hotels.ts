@@ -1,6 +1,6 @@
 import { db } from "./src/lib/db.js";
 import { room, roomType, booking } from "./src/db/schema.js";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 const roomTypesData = [
   { name: "Standard Room", description: "Kamar nyaman dengan fasilitas dasar lengkap." },
@@ -26,7 +26,7 @@ const hotels = [
     floorInfo: "Jakarta Barat",
     lat: -6.1774, lng: 106.7906,
     basePrice: 2800000,
-    mainImage: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1551882547-ff40c0d5e9af?w=800&auto=format&fit=crop",
     rating: 4.7, badge: "Akses Mall"
   },
   // BANDUNG
@@ -36,7 +36,7 @@ const hotels = [
     floorInfo: "Bandung, Jawa Barat",
     lat: -6.9255, lng: 107.6366,
     basePrice: 3000000,
-    mainImage: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1578683010236-d716f9a3f46c?w=800&auto=format&fit=crop",
     rating: 4.8, badge: "Keluarga"
   },
   {
@@ -45,7 +45,7 @@ const hotels = [
     floorInfo: "Ciumbuleuit, Bandung",
     lat: -6.8741, lng: 107.6033,
     basePrice: 3200000,
-    mainImage: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800&auto=format&fit=crop",
     rating: 4.9, badge: "Pemandangan Alam"
   },
   {
@@ -54,7 +54,7 @@ const hotels = [
     floorInfo: "Pasirkaliki, Bandung",
     lat: -6.9142, lng: 107.5966,
     basePrice: 2500000,
-    mainImage: "https://images.unsplash.com/photo-1551882547-ff40c0d5e9af?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop",
     rating: 4.6, badge: "Pusat Kota"
   },
   // TANGERANG
@@ -64,7 +64,7 @@ const hotels = [
     floorInfo: "Gading Serpong, Tangerang",
     lat: -6.2575, lng: 106.6265,
     basePrice: 2800000,
-    mainImage: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800&auto=format&fit=crop",
     rating: 4.8, badge: "Arsitektur Unik"
   },
   {
@@ -73,7 +73,7 @@ const hotels = [
     floorInfo: "Bandara Soetta, Tangerang",
     lat: -6.1213, lng: 106.6669,
     basePrice: 1500000,
-    mainImage: "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop",
     rating: 4.5, badge: "Dekat Bandara"
   },
   // DEPOK
@@ -83,7 +83,7 @@ const hotels = [
     floorInfo: "Margonda, Depok",
     lat: -6.3713, lng: 106.8335,
     basePrice: 1200000,
-    mainImage: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&auto=format&fit=crop",
     rating: 4.6, badge: "Pusat Bisnis"
   },
   {
@@ -92,7 +92,7 @@ const hotels = [
     floorInfo: "Margonda, Depok",
     lat: -6.3934, lng: 106.8229,
     basePrice: 800000,
-    mainImage: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1598928506311-c55dd1b31bb1?w=800&auto=format&fit=crop",
     rating: 4.4, badge: "Ekonomis"
   },
   // BEKASI
@@ -102,7 +102,7 @@ const hotels = [
     floorInfo: "Bekasi Barat, Bekasi",
     lat: -6.2464, lng: 106.9934,
     basePrice: 1100000,
-    mainImage: "https://images.unsplash.com/photo-1542314831-c6a4d14b8328?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&auto=format&fit=crop",
     rating: 4.5, badge: "Akses Mall"
   },
   {
@@ -111,7 +111,7 @@ const hotels = [
     floorInfo: "Summarecon Bekasi",
     lat: -6.2238, lng: 106.9996,
     basePrice: 950000,
-    mainImage: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&auto=format&fit=crop",
+    mainImage: "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?w=800&auto=format&fit=crop",
     rating: 4.6, badge: "Modern"
   }
 ];
@@ -125,7 +125,23 @@ const typeMultipliers = {
 };
 
 async function seedRealHotels() {
-  console.log("Seeding JABODETABEK & Bandung hotels with all room types...");
+  console.log("Cleaning up old hotels (except booked ones)...");
+  
+  // Find all rooms
+  const allRooms = await db.query.room.findMany();
+  let deletedCount = 0;
+  
+  for (const old of allRooms) {
+      // Check if it has bookings
+      const bks = await db.query.booking.findMany({ where: eq(booking.roomId, old.id) });
+      if (bks.length === 0) {
+          await db.delete(room).where(eq(room.id, old.id));
+          deletedCount++;
+      }
+  }
+  console.log(`Deleted ${deletedCount} unused old rooms.`);
+
+  console.log("Seeding JABODETABEK & Bandung hotels with unique realistic images and all room types...");
   
   // 1. Ensure all Room Types exist
   const existingTypesDb = await db.select().from(roomType);
@@ -146,8 +162,6 @@ async function seedRealHotels() {
   let totalInserted = 0;
 
   for (const hotel of hotels) {
-      console.log(`Creating rooms for ${hotel.hotelName}...`);
-      
       for (const [typeName, typeId] of typeMap.entries()) {
           // Calculate price based on multiplier
           const roomPrice = Math.round(hotel.basePrice * typeMultipliers[typeName]);
