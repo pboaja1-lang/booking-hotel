@@ -17,7 +17,7 @@ const hotels = [
     floorInfo: "Senayan, Jakarta",
     lat: -6.2163, lng: 106.7972,
     basePrice: 3500000,
-    mainImage: "https://images.unsplash.com/photo-1542314831-c6a4d14b8328?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/mulia.jpg",
     rating: 4.8, badge: "Ikon Kota"
   },
   {
@@ -26,7 +26,7 @@ const hotels = [
     floorInfo: "Jakarta Barat",
     lat: -6.1774, lng: 106.7906,
     basePrice: 2800000,
-    mainImage: "https://images.unsplash.com/photo-1551882547-ff40c0d5e9af?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/pullman.jpg",
     rating: 4.7, badge: "Akses Mall"
   },
   // BANDUNG
@@ -36,7 +36,7 @@ const hotels = [
     floorInfo: "Bandung, Jawa Barat",
     lat: -6.9255, lng: 107.6366,
     basePrice: 3000000,
-    mainImage: "https://images.unsplash.com/photo-1578683010236-d716f9a3f46c?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/trans.jpg",
     rating: 4.8, badge: "Keluarga"
   },
   {
@@ -45,7 +45,7 @@ const hotels = [
     floorInfo: "Ciumbuleuit, Bandung",
     lat: -6.8741, lng: 107.6033,
     basePrice: 3200000,
-    mainImage: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/padma.jpg",
     rating: 4.9, badge: "Pemandangan Alam"
   },
   {
@@ -54,7 +54,7 @@ const hotels = [
     floorInfo: "Pasirkaliki, Bandung",
     lat: -6.9142, lng: 107.5966,
     basePrice: 2500000,
-    mainImage: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/hilton.jpg",
     rating: 4.6, badge: "Pusat Kota"
   },
   // TANGERANG
@@ -64,7 +64,7 @@ const hotels = [
     floorInfo: "Gading Serpong, Tangerang",
     lat: -6.2575, lng: 106.6265,
     basePrice: 2800000,
-    mainImage: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/jhl.jpg",
     rating: 4.8, badge: "Arsitektur Unik"
   },
   {
@@ -73,7 +73,7 @@ const hotels = [
     floorInfo: "Bandara Soetta, Tangerang",
     lat: -6.1213, lng: 106.6669,
     basePrice: 1500000,
-    mainImage: "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/swiss.jpg",
     rating: 4.5, badge: "Dekat Bandara"
   },
   // DEPOK
@@ -83,7 +83,7 @@ const hotels = [
     floorInfo: "Margonda, Depok",
     lat: -6.3713, lng: 106.8335,
     basePrice: 1200000,
-    mainImage: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/margo.jpg",
     rating: 4.6, badge: "Pusat Bisnis"
   },
   {
@@ -92,7 +92,7 @@ const hotels = [
     floorInfo: "Margonda, Depok",
     lat: -6.3934, lng: 106.8229,
     basePrice: 800000,
-    mainImage: "https://images.unsplash.com/photo-1598928506311-c55dd1b31bb1?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/santika.jpg",
     rating: 4.4, badge: "Ekonomis"
   },
   // BEKASI
@@ -102,7 +102,7 @@ const hotels = [
     floorInfo: "Bekasi Barat, Bekasi",
     lat: -6.2464, lng: 106.9934,
     basePrice: 1100000,
-    mainImage: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/aston.jpg",
     rating: 4.5, badge: "Akses Mall"
   },
   {
@@ -111,7 +111,7 @@ const hotels = [
     floorInfo: "Summarecon Bekasi",
     lat: -6.2238, lng: 106.9996,
     basePrice: 950000,
-    mainImage: "https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?w=800&auto=format&fit=crop",
+    mainImage: "/hotels/harris.jpg",
     rating: 4.6, badge: "Modern"
   }
 ];
