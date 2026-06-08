@@ -85,6 +85,8 @@ export const room = pgTable("room", {
     .references(() => roomType.id),
   pricePerNight: integer("price_per_night").notNull(),
   status: text("status").notNull().default("available"), // "available" | "booked" | "maintenance"
+  latitude: real("latitude"),
+  longitude: real("longitude"),
   floorInfo: text("floor_info"),
   mainImage: text("main_image"),
   rating: real("rating").default(0),
