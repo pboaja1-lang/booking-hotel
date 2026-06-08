@@ -27,9 +27,12 @@ export const getAllRooms = async (filters?: RoomFilters) => {
       createdAt: room.createdAt,
       updatedAt: room.updatedAt,
       type: roomType.name,
+      images: sql<string[]>`COALESCE(JSON_AGG(${roomImage.url} ORDER BY ${roomImage.sortOrder}) FILTER (WHERE ${roomImage.url} IS NOT NULL), '[]')`,
     })
     .from(room)
-    .innerJoin(roomType, eq(room.roomTypeId, roomType.id));
+    .innerJoin(roomType, eq(room.roomTypeId, roomType.id))
+    .leftJoin(roomImage, eq(roomImage.roomId, room.id))
+    .groupBy(room.id, roomType.name);
 
   const conditions = [];
 
@@ -94,26 +97,45 @@ export const getFeaturedRooms = async () => {
     .limit(4);
 };
 
-export const createRoom = async (data: {
-  name: string;
-  description?: string;
-  roomTypeId: number;
-  pricePerNight: number;
-  status?: string;
-  floorInfo?: string;
-  mainImage?: string;
-  maxGuests?: number;
-}) => {
-  const [newRoom] = await db.insert(room).values(data).returning();
+export const createRoom = async (data: any) => {
+  const { images, ...roomData } = data;
+  const [newRoom] = await db.insert(room).values(roomData).returning();
+  
+  if (images && Array.isArray(images) && images.length > 0) {
+    const imageRecords = images.map((url: string, index: number) => ({
+      roomId: newRoom.id,
+      url,
+      sortOrder: index
+    }));
+    await db.insert(roomImage).values(imageRecords);
+  }
+  
   return newRoom;
 };
 
-export const updateRoom = async (id: number, data: Partial<typeof room.$inferInsert>) => {
+export const updateRoom = async (id: number, data: any) => {
+  const { images, ...roomData } = data;
+  
   const [updatedRoom] = await db
     .update(room)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...roomData, updatedAt: new Date() })
     .where(eq(room.id, id))
     .returning();
+    
+  if (images !== undefined && Array.isArray(images)) {
+    // Delete existing images
+    await db.delete(roomImage).where(eq(roomImage.roomId, id));
+    // Insert new images if any
+    if (images.length > 0) {
+      const imageRecords = images.map((url: string, index: number) => ({
+        roomId: id,
+        url,
+        sortOrder: index
+      }));
+      await db.insert(roomImage).values(imageRecords);
+    }
+  }
+    
   return updatedRoom;
 };
 

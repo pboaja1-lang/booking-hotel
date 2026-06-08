@@ -17,12 +17,13 @@ export default function AdminKamar() {
     status: 'available',
     floorInfo: '',
     mainImage: '',
+    images: [],
     description: '',
   });
 
   const openAddModal = () => {
     setEditingRoomId(null);
-    setFormData({ name: '', roomTypeId: 1, pricePerNight: '', status: 'available', floorInfo: '', mainImage: '', description: '' });
+    setFormData({ name: '', roomTypeId: 1, pricePerNight: '', status: 'available', floorInfo: '', mainImage: '', images: [], description: '' });
     setIsModalOpen(true);
   };
 
@@ -40,6 +41,9 @@ export default function AdminKamar() {
       status: room.status || 'available',
       floorInfo: room.floorInfo || '',
       mainImage: room.mainImage || room.image || '',
+      images: Array.isArray(room.images) && room.images.length > 0 
+                ? room.images 
+                : (room.mainImage ? [room.mainImage] : []),
       description: room.description || '',
     });
     setIsModalOpen(true);
@@ -53,7 +57,8 @@ export default function AdminKamar() {
       pricePerNight: Number(formData.pricePerNight.toString().replace(/[^0-9]/g, '')),
       status: formData.status,
       floorInfo: formData.floorInfo,
-      mainImage: formData.mainImage,
+      mainImage: formData.images.length > 0 ? formData.images[0] : '',
+      images: formData.images.filter(url => url.trim() !== ''),
       description: formData.description,
       maxGuests: 2,
     };
@@ -65,8 +70,23 @@ export default function AdminKamar() {
     }
 
     setIsModalOpen(false);
-    setFormData({ name: '', roomTypeId: 1, pricePerNight: '', status: 'available', floorInfo: '', mainImage: '', description: '' });
+    setFormData({ name: '', roomTypeId: 1, pricePerNight: '', status: 'available', floorInfo: '', mainImage: '', images: [], description: '' });
     setEditingRoomId(null);
+  };
+
+  const handleAddImage = () => {
+    setFormData({ ...formData, images: [...formData.images, ''] });
+  };
+
+  const handleImageChange = (index, value) => {
+    const newImages = [...formData.images];
+    newImages[index] = value;
+    setFormData({ ...formData, images: newImages });
+  };
+
+  const handleRemoveImage = (index) => {
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData({ ...formData, images: newImages });
   };
 
   // Filter logic
@@ -290,22 +310,62 @@ export default function AdminKamar() {
                   <label className="font-label-sm text-label-sm text-on-surface-variant">Info Lantai & Kapasitas</label>
                   <input required value={formData.floorInfo} onChange={e => setFormData({ ...formData, floorInfo: e.target.value })} className="px-4 py-2 bg-surface border border-surface-variant rounded-lg outline-none focus:ring-1 focus:ring-primary font-body-sm" placeholder="Cth: Lantai 2 • Maks 3 Tamu" />
                 </div>
-                <div className="flex flex-col gap-1 md:col-span-2">
-                  <label className="font-label-sm text-label-sm text-on-surface-variant">URL Gambar (Opsional)</label>
-                  <input value={formData.mainImage} onChange={e => setFormData({ ...formData, mainImage: e.target.value })} className="px-4 py-2 bg-surface border border-surface-variant rounded-lg outline-none focus:ring-1 focus:ring-primary font-body-sm" placeholder="Cth: https://example.com/image.jpg" />
-                  {formData.mainImage && (
-                    <div className="mt-2 w-full h-40 bg-surface-variant rounded-lg overflow-hidden border border-surface-variant/50 flex items-center justify-center relative">
-                      <img
-                        key={formData.mainImage}
-                        src={formData.mainImage}
-                        alt="Preview Kamar"
-                        className="w-full h-full object-cover z-10"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
-                      <div className="absolute z-0 flex flex-col items-center text-secondary">
-                        <span className="material-symbols-outlined text-[32px] mb-1">broken_image</span>
-                        <span className="font-label-sm text-label-sm">Gambar tidak dapat dimuat</span>
-                      </div>
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <label className="font-label-sm text-label-sm text-on-surface-variant">URL Gambar Kamar</label>
+                    <button 
+                      type="button" 
+                      onClick={handleAddImage}
+                      className="text-primary hover:text-primary-container transition-colors font-label-sm flex items-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">add</span>
+                      Tambah Foto
+                    </button>
+                  </div>
+                  
+                  {formData.images.length === 0 ? (
+                    <div className="p-4 border border-dashed border-surface-variant rounded-lg text-center text-secondary font-body-sm">
+                      Belum ada gambar. Klik "Tambah Foto" untuk memasukkan URL.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {formData.images.map((url, index) => (
+                        <div key={index} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-surface-container-lowest p-3 rounded-lg border border-surface-variant/50">
+                          <div className="flex-1 w-full relative">
+                            <input 
+                              value={url} 
+                              onChange={(e) => handleImageChange(index, e.target.value)} 
+                              className="w-full px-4 py-2 bg-surface border border-surface-variant rounded-lg outline-none focus:ring-1 focus:ring-primary font-body-sm" 
+                              placeholder="Cth: https://example.com/image.jpg" 
+                            />
+                            {index === 0 && (
+                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] bg-primary-container text-on-primary-container px-2 py-0.5 rounded font-medium">Utama</span>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+                            {url ? (
+                              <div className="w-16 h-10 rounded overflow-hidden bg-surface-variant border border-surface-variant flex-shrink-0 relative">
+                                <img src={url} alt={`Preview ${index}`} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                                <span className="material-symbols-outlined text-[16px] text-secondary absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 -z-10">broken_image</span>
+                              </div>
+                            ) : (
+                              <div className="w-16 h-10 rounded bg-surface-variant border border-surface-variant flex-shrink-0 flex items-center justify-center">
+                                <span className="material-symbols-outlined text-[16px] text-secondary">image</span>
+                              </div>
+                            )}
+                            
+                            <button 
+                              type="button" 
+                              onClick={() => handleRemoveImage(index)}
+                              className="text-error hover:bg-error-container/20 p-2 rounded-lg transition-colors flex-shrink-0"
+                              title="Hapus Gambar"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
