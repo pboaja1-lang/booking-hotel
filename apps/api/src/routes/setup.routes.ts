@@ -1,185 +1,188 @@
 import { Router } from "express";
+import { pool } from "../lib/db.js";
 import { db } from "../lib/db.js";
-import { sql } from "drizzle-orm";
 import { roomType, room } from "../db/schema.js";
+import { sql } from "drizzle-orm";
 
 const router = Router();
 
-const migrationSql = `
-CREATE TABLE IF NOT EXISTS "user" (
-	"id" text PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	"email" text NOT NULL,
-	"email_verified" boolean DEFAULT false NOT NULL,
-	"image" text,
-	"phone" text,
-	"role" text DEFAULT 'user' NOT NULL,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL,
-	CONSTRAINT "user_email_unique" UNIQUE("email")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "account" (
-	"id" text PRIMARY KEY NOT NULL,
-	"account_id" text NOT NULL,
-	"provider_id" text NOT NULL,
-	"user_id" text NOT NULL,
-	"access_token" text,
-	"refresh_token" text,
-	"id_token" text,
-	"access_token_expires_at" timestamp,
-	"refresh_token_expires_at" timestamp,
-	"scope" text,
-	"password" text,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "booking" (
-	"id" text PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
-	"room_id" integer NOT NULL,
-	"check_in" timestamp NOT NULL,
-	"check_out" timestamp NOT NULL,
-	"nights" integer NOT NULL,
-	"adults" integer DEFAULT 1 NOT NULL,
-	"children" integer DEFAULT 0 NOT NULL,
-	"special_requests" text,
-	"guest_name" text NOT NULL,
-	"guest_email" text NOT NULL,
-	"guest_phone" text,
-	"subtotal" integer NOT NULL,
-	"tax_amount" integer NOT NULL,
-	"total_amount" integer NOT NULL,
-	"status" text DEFAULT 'Pending' NOT NULL,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "payment" (
-	"id" text PRIMARY KEY NOT NULL,
-	"booking_id" text NOT NULL,
-	"method" text NOT NULL,
-	"provider" text,
-	"amount" integer NOT NULL,
-	"status" text DEFAULT 'pending' NOT NULL,
-	"virtual_account_number" text,
-	"paid_at" timestamp,
-	"expires_at" timestamp,
-	"created_at" timestamp NOT NULL,
-	CONSTRAINT "payment_booking_id_unique" UNIQUE("booking_id")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "room_type" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	"description" text,
-	"created_at" timestamp NOT NULL,
-	CONSTRAINT "room_type_name_unique" UNIQUE("name")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "room" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	"description" text,
-	"room_type_id" integer NOT NULL,
-	"price_per_night" integer NOT NULL,
-	"status" text DEFAULT 'available' NOT NULL,
-	"floor_info" text,
-	"main_image" text,
-	"rating" real DEFAULT 0,
-	"badge" text,
-	"max_guests" integer DEFAULT 2,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "room_image" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"room_id" integer NOT NULL,
-	"url" text NOT NULL,
-	"alt_text" text,
-	"sort_order" integer DEFAULT 0
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "session" (
-	"id" text PRIMARY KEY NOT NULL,
-	"expires_at" timestamp NOT NULL,
-	"token" text NOT NULL,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp NOT NULL,
-	"ip_address" text,
-	"user_agent" text,
-	"user_id" text NOT NULL,
-	CONSTRAINT "session_token_unique" UNIQUE("token")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "verification" (
-	"id" text PRIMARY KEY NOT NULL,
-	"identifier" text NOT NULL,
-	"value" text NOT NULL,
-	"expires_at" timestamp NOT NULL,
-	"created_at" timestamp,
-	"updated_at" timestamp
-);
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "booking" ADD CONSTRAINT "booking_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "booking" ADD CONSTRAINT "booking_room_id_room_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."room"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "payment" ADD CONSTRAINT "payment_booking_id_booking_id_fk" FOREIGN KEY ("booking_id") REFERENCES "public"."booking"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "room" ADD CONSTRAINT "room_room_type_id_room_type_id_fk" FOREIGN KEY ("room_type_id") REFERENCES "public"."room_type"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "room_image" ADD CONSTRAINT "room_image_room_id_room_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."room"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-`;
-
 router.get("/", async (req, res) => {
+  const results: string[] = [];
+  
   try {
-    console.log("Setting up database schema and seed data...");
+    results.push("Starting database setup...");
 
-    // 1. Run Migrations directly
-    const statements = migrationSql.split("--> statement-breakpoint");
-    for (const statement of statements) {
-      if (statement.trim()) {
-        await db.execute(sql.raw(statement.trim()));
+    // Use pool.query directly for DDL statements (CREATE TABLE)
+    const client = await pool.connect();
+    
+    try {
+      // Create tables one by one using pool.query (not drizzle)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "user" (
+          "id" text PRIMARY KEY NOT NULL,
+          "name" text NOT NULL,
+          "email" text NOT NULL,
+          "email_verified" boolean DEFAULT false NOT NULL,
+          "image" text,
+          "phone" text,
+          "role" text DEFAULT 'user' NOT NULL,
+          "created_at" timestamp NOT NULL,
+          "updated_at" timestamp NOT NULL,
+          CONSTRAINT "user_email_unique" UNIQUE("email")
+        )
+      `);
+      results.push("✅ Table 'user' created");
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "account" (
+          "id" text PRIMARY KEY NOT NULL,
+          "account_id" text NOT NULL,
+          "provider_id" text NOT NULL,
+          "user_id" text NOT NULL,
+          "access_token" text,
+          "refresh_token" text,
+          "id_token" text,
+          "access_token_expires_at" timestamp,
+          "refresh_token_expires_at" timestamp,
+          "scope" text,
+          "password" text,
+          "created_at" timestamp NOT NULL,
+          "updated_at" timestamp NOT NULL
+        )
+      `);
+      results.push("✅ Table 'account' created");
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "session" (
+          "id" text PRIMARY KEY NOT NULL,
+          "expires_at" timestamp NOT NULL,
+          "token" text NOT NULL,
+          "created_at" timestamp NOT NULL,
+          "updated_at" timestamp NOT NULL,
+          "ip_address" text,
+          "user_agent" text,
+          "user_id" text NOT NULL,
+          CONSTRAINT "session_token_unique" UNIQUE("token")
+        )
+      `);
+      results.push("✅ Table 'session' created");
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "verification" (
+          "id" text PRIMARY KEY NOT NULL,
+          "identifier" text NOT NULL,
+          "value" text NOT NULL,
+          "expires_at" timestamp NOT NULL,
+          "created_at" timestamp,
+          "updated_at" timestamp
+        )
+      `);
+      results.push("✅ Table 'verification' created");
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "room_type" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "name" text NOT NULL,
+          "description" text,
+          "created_at" timestamp NOT NULL,
+          CONSTRAINT "room_type_name_unique" UNIQUE("name")
+        )
+      `);
+      results.push("✅ Table 'room_type' created");
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "room" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "name" text NOT NULL,
+          "description" text,
+          "room_type_id" integer NOT NULL,
+          "price_per_night" integer NOT NULL,
+          "status" text DEFAULT 'available' NOT NULL,
+          "floor_info" text,
+          "main_image" text,
+          "rating" real DEFAULT 0,
+          "badge" text,
+          "max_guests" integer DEFAULT 2,
+          "created_at" timestamp NOT NULL,
+          "updated_at" timestamp NOT NULL
+        )
+      `);
+      results.push("✅ Table 'room' created");
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "room_image" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "room_id" integer NOT NULL,
+          "url" text NOT NULL,
+          "alt_text" text,
+          "sort_order" integer DEFAULT 0
+        )
+      `);
+      results.push("✅ Table 'room_image' created");
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "booking" (
+          "id" text PRIMARY KEY NOT NULL,
+          "user_id" text NOT NULL,
+          "room_id" integer NOT NULL,
+          "check_in" timestamp NOT NULL,
+          "check_out" timestamp NOT NULL,
+          "nights" integer NOT NULL,
+          "adults" integer DEFAULT 1 NOT NULL,
+          "children" integer DEFAULT 0 NOT NULL,
+          "special_requests" text,
+          "guest_name" text NOT NULL,
+          "guest_email" text NOT NULL,
+          "guest_phone" text,
+          "subtotal" integer NOT NULL,
+          "tax_amount" integer NOT NULL,
+          "total_amount" integer NOT NULL,
+          "status" text DEFAULT 'Pending' NOT NULL,
+          "created_at" timestamp NOT NULL,
+          "updated_at" timestamp NOT NULL
+        )
+      `);
+      results.push("✅ Table 'booking' created");
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS "payment" (
+          "id" text PRIMARY KEY NOT NULL,
+          "booking_id" text NOT NULL,
+          "method" text NOT NULL,
+          "provider" text,
+          "amount" integer NOT NULL,
+          "status" text DEFAULT 'pending' NOT NULL,
+          "virtual_account_number" text,
+          "paid_at" timestamp,
+          "expires_at" timestamp,
+          "created_at" timestamp NOT NULL,
+          CONSTRAINT "payment_booking_id_unique" UNIQUE("booking_id")
+        )
+      `);
+      results.push("✅ Table 'payment' created");
+
+      // Add foreign keys (ignore if already exist)
+      const fks = [
+        `DO $$ BEGIN ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object THEN null; END $$`,
+        `DO $$ BEGIN ALTER TABLE "booking" ADD CONSTRAINT "booking_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object THEN null; END $$`,
+        `DO $$ BEGIN ALTER TABLE "booking" ADD CONSTRAINT "booking_room_id_room_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."room"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object THEN null; END $$`,
+        `DO $$ BEGIN ALTER TABLE "payment" ADD CONSTRAINT "payment_booking_id_booking_id_fk" FOREIGN KEY ("booking_id") REFERENCES "public"."booking"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object THEN null; END $$`,
+        `DO $$ BEGIN ALTER TABLE "room" ADD CONSTRAINT "room_room_type_id_room_type_id_fk" FOREIGN KEY ("room_type_id") REFERENCES "public"."room_type"("id") ON DELETE no action ON UPDATE no action; EXCEPTION WHEN duplicate_object THEN null; END $$`,
+        `DO $$ BEGIN ALTER TABLE "room_image" ADD CONSTRAINT "room_image_room_id_room_id_fk" FOREIGN KEY ("room_id") REFERENCES "public"."room"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object THEN null; END $$`,
+        `DO $$ BEGIN ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action; EXCEPTION WHEN duplicate_object THEN null; END $$`,
+      ];
+
+      for (const fk of fks) {
+        await client.query(fk);
       }
-    }
-    console.log("Schema created successfully.");
+      results.push("✅ Foreign keys added");
 
-    // 2. Seed Room Types
+    } finally {
+      client.release();
+    }
+
+    // 2. Seed Room Types using Drizzle ORM
+    results.push("Seeding room types...");
     const types = [
       { name: "Standard Room", description: "Nyaman dan terjangkau untuk 1-2 orang." },
       { name: "Deluxe Room", description: "Kamar luas dengan fasilitas lengkap dan pemandangan indah." },
@@ -197,10 +200,12 @@ router.get("/", async (req, res) => {
         createdTypes.push(existing.rows[0]);
       }
     }
-    
+    results.push("✅ Room types seeded");
+
     const getType = (name: string) => createdTypes.find((t: any) => t.name === name)!.id;
 
     // 3. Seed Rooms
+    results.push("Seeding rooms...");
     const rooms = [
       {
         name: "Ocean View Suite 101",
@@ -255,29 +260,31 @@ router.get("/", async (req, res) => {
         await db.insert(room).values(r);
       }
     }
+    results.push("✅ Rooms seeded");
+
+    results.push("🎉 Database setup completed successfully!");
 
     res.status(200).send(`
       <html>
-        <body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
-          <h1>✅ Database Berhasil Disinkronisasi!</h1>
-          <p>Semua tabel dan data kamar hotel telah berhasil dimasukkan ke Supabase.</p>
-          <p>Silakan kembali ke <a href="https://booking-hotel-web.vercel.app">Halaman Utama</a> untuk melihat kamar Anda.</p>
-          <hr style="margin-top: 30px; margin-bottom: 30px;" />
-          <h3>Cara Login Admin:</h3>
-          <p>1. Silakan ke halaman <b>Daftar</b> di web Anda.</p>
-          <p>2. Daftar menggunakan email: <b>admin@gmail.com</b> dan password bebas (misal: <b>password123</b>).</p>
-          <p>3. Setelah mendaftar, akun tersebut akan bisa login secara normal.</p>
-          <p><i>(Hubungi saya lagi jika Anda ingin saya mengubah akun tersebut menjadi Role Admin)</i></p>
+        <head><title>Database Setup</title></head>
+        <body style="font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
+          <h1 style="color: green;">✅ Database Berhasil Disinkronisasi!</h1>
+          <ul>${results.map(r => `<li>${r}</li>`).join("")}</ul>
+          <hr/>
+          <p>Kembali ke <a href="https://booking-hotel-web.vercel.app">Halaman Utama</a></p>
         </body>
       </html>
     `);
   } catch (err: any) {
-    console.error(err);
+    console.error("Setup error:", err);
     res.status(500).send(`
       <html>
-        <body style="font-family: sans-serif; text-align: center; padding-top: 50px; color: red;">
-          <h1>❌ Gagal Mengisi Database</h1>
-          <p>Error: ${err.message}</p>
+        <head><title>Database Setup Error</title></head>
+        <body style="font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
+          <h1 style="color: red;">❌ Gagal Mengisi Database</h1>
+          <p><b>Error:</b> ${err.message}</p>
+          <p><b>Progress:</b></p>
+          <ul>${results.map(r => `<li>${r}</li>`).join("")}</ul>
         </body>
       </html>
     `);
