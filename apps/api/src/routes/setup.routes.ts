@@ -187,7 +187,7 @@ router.get("/", async (req, res) => {
       { name: "Private Villa", description: "Privasi maksimal dengan kolam renang pribadi." },
     ];
 
-    const createdTypes = [];
+    const createdTypes: any[] = [];
     for (const t of types) {
       const existing = await db.execute(sql`SELECT * FROM "room_type" WHERE "name" = ${t.name}`);
       if (existing.rows.length === 0) {
