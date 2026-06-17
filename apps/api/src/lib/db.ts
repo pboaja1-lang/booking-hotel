@@ -1,14 +1,10 @@
-import "dotenv/config";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/pglite";
+import { PGlite } from "@electric-sql/pglite";
 import * as schema from "../db/schema.js";
+import path from "path";
 
-const connectionString = process.env.DATABASE_URL;
+const dbPath = path.resolve(process.cwd(), ".data/pglite");
+const client = new PGlite(dbPath);
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is not set");
-}
+export const db = drizzle(client, { schema });
 
-const pool = new Pool({ connectionString });
-
-export const db = drizzle({ client: pool, schema });
