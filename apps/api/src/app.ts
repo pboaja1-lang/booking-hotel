@@ -57,6 +57,19 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+// Diagnostic endpoint - check env vars without needing database
+app.get("/api/debug-env", (req, res) => {
+  const dbUrl = process.env.DATABASE_URL;
+  res.status(200).json({
+    hasDbUrl: !!dbUrl,
+    dbUrlPrefix: dbUrl ? dbUrl.substring(0, 30) + "..." : "NOT SET",
+    hasBetterAuthSecret: !!process.env.BETTER_AUTH_SECRET,
+    nodeEnv: process.env.NODE_ENV,
+    vercel: process.env.VERCEL,
+    region: process.env.VERCEL_REGION,
+  });
+});
+
 // Root endpoint
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Booking Hotel API is running", status: "ok" });
