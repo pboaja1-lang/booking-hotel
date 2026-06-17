@@ -9,6 +9,7 @@ import bookingRoutes from "./routes/booking.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import setupRoutes from "./routes/setup.routes.js";
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/setup-db", setupRoutes);
 
 // Health check
 app.get("/health", (req, res) => {
